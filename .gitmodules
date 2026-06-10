@@ -1,0 +1,6 @@
+[submodule ".skills/android/official"]
+	path = .skills/android/official
+	url = https://github.com/android/skills
+[submodule ".skills/claude/official"]
+	path = .skills/claude/official
+	url = https://github.com/anthropics/skills
