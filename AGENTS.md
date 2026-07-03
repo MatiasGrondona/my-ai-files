@@ -23,14 +23,14 @@ Custom skills authored for this project. Highest priority — override anything 
 | `compose-samples` | `android/my/compose-samples/SKILL.md` | Canonical Compose patterns, architecture references, or real-world implementation examples (Reply, Jetcaster, NowInAndroid…) |
 | `snippets` | `android/my/snippets/SKILL.md` | Generating idiomatic Android code for any documented API — source of truth for developer.android.com samples |
 | `performance-samples` | `android/my/performance-samples/SKILL.md` | Macrobenchmark, Microbenchmark, Baseline Profile generation, JankStats |
-| `android-compose-ui` | `android/my/android-compose-ui/SKILL.md` | Compose UI implementation: layouts, components, state, modifiers, previews |
-| `android-data-layer` | `android/my/android-data-layer/SKILL.md` | Data layer architecture: repositories, data sources, Room, DataStore, network |
-| `android-di-koin` | `android/my/android-di-koin/SKILL.md` | Dependency injection with Koin: modules, scopes, ViewModels, testing |
-| `android-error-handling` | `android/my/android-error-handling/SKILL.md` | Error handling patterns: sealed results, error states, UI error display |
-| `android-module-structure` | `android/my/android-module-structure/SKILL.md` | Multi-module project structure, module types, dependency graph, convention plugins |
-| `android-navigation` | `android/my/android-navigation/SKILL.md` | Navigation: Navigation 3, deep links, back stack, adaptive navigation. **Use this over `navigation-3` (Google) for all Nav3 work** |
-| `android-presentation-mvi` | `android/my/android-presentation-mvi/SKILL.md` | Presentation layer with MVI: UiState, UiEvent, ViewModel, StateFlow patterns |
-| `android-testing` | `android/my/android-testing/SKILL.md` | Android testing: unit tests, Compose UI tests, fakes, test architecture |
+| `android-compose-ui` | `android/my/android-compose-ui/SKILL.md` | Composable stability, recomposition, side effects, lazy lists, animations, previews, accessibility, custom modifiers, design system composables |
+| `android-data-layer` | `android/my/android-data-layer/SKILL.md` | Data sources, repositories, DTOs, mappers, Room entities, Ktor HttpClient, safe call helpers, token storage, offline-first |
+| `android-di-koin` | `android/my/android-di-koin/SKILL.md` | Koin module definitions per layer, ViewModel injection, assembling modules in :app, `koinViewModel()` in composables |
+| `android-error-handling` | `android/my/android-error-handling/SKILL.md` | Generic `Result<T, E>` wrapper, `DataError`, `EmptyResult`, map/onSuccess/onFailure helpers — used across all layers, not just data |
+| `android-module-structure` | `android/my/android-module-structure/SKILL.md` | Module layout, dependency rules, Gradle convention plugins, version catalogs, deciding where new modules and features live |
+| `android-navigation` | `android/my/android-navigation/SKILL.md` | Type-safe Compose Navigation: route objects, feature nav graphs, cross-feature callbacks, wiring in :app. **Use this over `navigation-3` (Google) for all Nav3 work** |
+| `android-presentation-mvi` | `android/my/android-presentation-mvi/SKILL.md` | MVI: State/Action/Event, ViewModel, Root/Screen composable split, UI models, `UiText` error mapping, process death with `SavedStateHandle` |
+| `android-testing` | `android/my/android-testing/SKILL.md` | ViewModel unit tests with JUnit5, Turbine, AssertK, `UnconfinedTestDispatcher`, fake repositories, `SavedStateHandle`, Compose UI tests |
 
 ### Google Android Skills — `.skills/android/google/` (`android/skills`)
 
@@ -204,12 +204,21 @@ fun loadUser(userId: String): Flow<UserUiState>
 
 ---
 
+## Version Control
+
+- After completing a task (feature, fix, or refactor), commit the changes with a conventional commit message (`feat:`, `fix:`, `refactor:`, `chore:`, etc.) summarizing what was done.
+- Do not commit partial or broken work — only commit when the task compiles/builds successfully.
+- Do not push to the remote repository automatically. Only push when explicitly instructed with a command like "push" or "push to remote".
+- When pushing, push to the current branch's upstream unless told otherwise.
+- Never force-push unless explicitly instructed.
+
+---
+
 ## Conventions
 
 ### Android
 
-- Always follow **Material 3 Expressive** for all UI. Read `skills/android-m3expressive/SKILL.md`
-  before writing any UI code.
+- Always follow **Material 3 Expressive** for all UI. Read `.skills/android/my/m3-expressive/SKILL.md` before writing any UI code.
 - Use Jetpack Compose for all new UI. Do not introduce new View-based UI unless explicitly
   instructed.
 
@@ -225,6 +234,42 @@ fun loadUser(userId: String): Flow<UserUiState>
 ### Package Manager
 
 - Always use **pnpm**. Never use npm or yarn.
+
+---
+
+## Build Output Naming
+
+Whenever the version is updated in `CHANGELOG.md` or in the app's `versionName`, also update
+the APK output file name to match. Keep these three in sync at all times:
+
+- `CHANGELOG.md` — latest version entry (e.g. `[0.1.03-alpha]`)
+- `versionName` in `app/build.gradle.kts`
+- `archivesName` in `app/build.gradle.kts`
+
+### Implementation
+
+```kotlin
+// app/build.gradle.kts
+android {
+    defaultConfig {
+        versionName = "0.1.03-alpha"
+    }
+    archivesName = "swipe-${defaultConfig.versionName}"
+}
+```
+
+This produces `swipe-0.1.03-alpha-debug.apk` / `swipe-0.1.03-alpha-release.apk`
+instead of `app-debug.apk`.
+
+> **AGP version note:** This project uses AGP 9.x. Use `archivesName` — `archivesBaseName`
+> (the AGP 8.x property) is deprecated and will not work.
+
+### What to update every session
+
+1. Bump `versionName` in `app/build.gradle.kts`
+2. Add the matching version entry to `CHANGELOG.md`
+3. Verify `archivesName` reflects the new version — it uses `defaultConfig.versionName`
+   directly so it updates automatically if set as shown above
 
 ---
 
